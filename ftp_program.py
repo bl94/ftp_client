@@ -65,7 +65,7 @@ class Server():
                 case 1:
                     self.remove_directory()
                 case 2:
-                    self.read_file(input("Enter the name of the file you want to read"))
+                    self.read_file()
                 case 3:
                     self.write_file(input("Enter the name of the file you want to write"))
                 case 4:
@@ -99,11 +99,15 @@ class Server():
         self.source.retrlines('NLST',list_files.append)
         return list_files
 
-    def read_file(self,FILENAME):
+    def read_file(self):
         '''
         reading file on server(ONLY .txt FILES)
         '''
-        print(f"Read{FILENAME} file : ")
+        dirname=input("Enter directory file who want to read or if you want read file from main path, enter '/': ")
+        dirname=f'/{dirname}'
+        self.source.cwd(dirname)
+        FILENAME=input("Enter file name: ")
+        print(f"Read {FILENAME} file: ")
         with open(FILENAME,'wb')as localfile:
             self.source.retrbinary('RETR '+FILENAME,localfile.write)
         with open(FILENAME,mode='r',encoding='utf-8')as file:
@@ -129,7 +133,7 @@ class Server():
         #we have two solutions, we can change name file or remove file on client computer
         if os.path.isfile(f'donwload_{FILENAME}'):
             try:
-                choice=input("The same file is on your computer folder. Do you want delete it or rename it? (D or R)" )
+                choice=input("The same file is on your computer folder. Do you want delete it or rename it? (D or R) ")
                 if choice=="D":#
                     os.remove(f'donwload_{FILENAME}')
                 if choice=="R":
@@ -139,8 +143,8 @@ class Server():
         with open(FILENAME,'wb') as localfile:
             self.source.retrbinary('RETR '+FILENAME,localfile.write) #write file in the same directory that running file
         os.rename(FILENAME,f'donwload_{FILENAME}')
-        print(f"Donwload f'donwload_{FILENAME}' to client computer")
- 
+        print(f"Donwload 'donwload_{FILENAME}' to client computer")
+
     def upload_file_to_server(self,FILENAME):
         """
         upload file to server
@@ -169,6 +173,8 @@ class Server():
 
 def __main__():
     ftp_server=Server()
+    print(ftp_server.source.nlst())
+    ftp_server.read_file()
     print(ftp_server.is_file_in_dir())
     print(ftp_server.list_dir())
     #ftp_server.donwload_file_from_server(FILENAME)
