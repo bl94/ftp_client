@@ -1,3 +1,6 @@
+'''
+FTP CLIENT
+'''
 from ftplib import FTP
 import getpass
 import os
@@ -5,16 +8,14 @@ import os.path
 
 PATH=os.path.dirname(__file__)#path running file
 os.chdir(PATH)#change path into path running file
-'''
-FTP CLIENT
-'''
+
 HOST='testbl.prv.pl'
 USER='testbl@prv.pl'
 PASSWD="Lepper12"
 PORT=21
-host1='testftp.ugu.pl'
-user2='testftp.ugu.pl'
-passwd3="Lepper11"
+HOST2='testftp.ugu.pl'
+USER2='testftp.ugu.pl'
+PASSWD="Lepper11"
 
 class Server():
     '''
@@ -32,9 +33,12 @@ class Server():
         '''
         login method
         '''
-        self.host=input('Enter your ftp address in format xxx.xxx.xxx: ')
-        self.user=input('Enter your username: ')
-        self.passwd=getpass.getpass('Enter your password: ')
+        self.host='testftp.ugu.pl'
+        self.user='testftp.ugu.pl'
+        self.passwd="Lepper11"
+       #self.host=input('Enter your ftp address in format xxx.xxx.xxx: ')
+       #self.user=input('Enter your username: ')
+       #self.passwd=getpass.getpass('Enter your password: ')
         self.source=FTP(self.host)
         self.source.login(self.user,self.passwd)
         print(f"Connection succesful {self.source.getwelcome()}")
@@ -65,12 +69,12 @@ class Server():
                 case 3:
                     self.write_file(input("Enter the name of the file you want to write"))
                 case 4:
-                    self.donwload_file_from_server(input("Enter the name of the file you want\n"
+                    self.donwload_file_from_server(input("Enter the name of the file you want"\
                     "to donwload"))
                 case 5:
-                    self.upload_to_server(input("Enter the name of the file you want to upload"))
+                    self.upload_file_to_server(input("Enter the name of the file you want to upload"))
                 case 6:
-                    self.listdir()
+                    self.list_dir()
                 case 7:
                     self.quit()
 
@@ -80,23 +84,36 @@ class Server():
         '''
         folder=input("Enter name new folder:")
         self.source.mkd(f'/{folder}')
+        print(f"Created new folder '{folder}'")
 
     def remove_directory(self):
         '''
         create new folder on server
         '''
-        folder=input("Enter name new folder or file which you want to delete: ")
+        folder=input("Enter name folder or file you want to delete: ")
         self.source.mkd(f'/{folder}')
+        print(f"Deleted folder '{folder}'")
+    
+    def is_file_in_dir(self):
+        list_files=[]
+        self.source.retrlines('NLST',list_files.append)
+        return list_files
 
     def read_file(self,FILENAME):
-        localfile=open(FILENAME,'wb')
-        self.source.retrbinary('RETR '+FILENAME,localfile.write)
-        localfile.close()
+        '''
+        reading file on server(ONLY .txt FILES)
+        '''
+        print(f"Read{FILENAME} file : ")
+        with open(FILENAME,'wb')as localfile:
+            self.source.retrbinary('RETR '+FILENAME,localfile.write)
         with open(FILENAME,mode='r',encoding='utf-8')as file:
             print(file.read())
         os.remove(FILENAME)
-
+        
     def write_file(self,FILENAME):#to change
+        '''
+        writing file on server
+        '''
         localfile=open(FILENAME,'wb')
         self.source.retrbinary('RETR '+FILENAME,localfile.write)
         localfile.close()
@@ -105,31 +122,58 @@ class Server():
         os.remove(FILENAME)
 
     def donwload_file_from_server(self,FILENAME):
+        '''
+        donwload file on server
+        '''
+        #if There is the same file on client computer folder and on server
+        #we have two solutions, we can change name file or remove file on client computer
         if os.path.isfile(f'donwload_{FILENAME}'):
-            os.remove(f'donwload_{FILENAME}')
-        localfile=open(FILENAME,'wb')
-        self.source.retrbinary('RETR '+FILENAME,localfile.write)
-        localfile.close()
-        os.rename('text.txt',f'donwload_{FILENAME}')
+            try:
+                choice=input("The same file is on your computer folder. Do you want delete it or rename it? (D or R)" )
+                if choice=="D":#
+                    os.remove(f'donwload_{FILENAME}')
+                if choice=="R":
+                    os.rename(f'donwload_{FILENAME}',input("Enter the renamed file :"))
+            except TypeError:
+                print("Enter wrong character")
+        with open(FILENAME,'wb') as localfile:
+            self.source.retrbinary('RETR '+FILENAME,localfile.write) #write file in the same directory that running file
+        os.rename(FILENAME,f'donwload_{FILENAME}')
+        print(f"Donwload f'donwload_{FILENAME}' to client computer")
  
-    def upload_to_server(self,FILENAME):
-        localfile=open(FILENAME,mode='rb')
-        self.source.storlines('STOR '+ FILENAME,localfile)
-        localfile.close()
+    def upload_file_to_server(self,FILENAME):
+        """
+        upload file to server
+        """
+        with open(FILENAME,mode='rb') as localfile:
+            self.source.storlines('STOR '+ FILENAME,localfile)
+        print(f"Upload {FILENAME} to server")
 
-    def listdir(self):
-        print(self.source.dir())
+    def list_dir(self):
+        """
+        listing file in directory
+        """
+        dirname=input("Enter directory which you want listing files or if you want listing files from main path enter '/': ")
+        dirname=f'/{dirname}'
+        self.source.cwd(dirname)
+        list_files=[]
+        self.source.retrlines('NLST',list_files.append)
+        return list_files
 
     def quit(self):
+        """
+        close connection with server
+        """
+        print('Closed connection with server')
         self.source.close()
 
 def __main__():
     ftp_server=Server()
-
-    FILENAME='text.txt'
-    ftp_server.donwload_file_from_server(FILENAME)
-    ftp_server.upload_to_server('xyz.txt')
-    ftp_server.quit()
+    print(ftp_server.is_file_in_dir())
+    print(ftp_server.list_dir())
+    #ftp_server.donwload_file_from_server(FILENAME)
+    #ftp_server.upload_fileto_server('xyz.txt')
+    #ftp_server.quit()
 
 if __name__=='__main__':
     __main__()
