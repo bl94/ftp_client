@@ -256,7 +256,7 @@ class Server():
                     print('*'*50)
                     print('You enter wrong directory or directory is file. Write correct directory!')
                     print('*'*50)
-
+ 
     def list_files_in_client_computer(self):
         '''
         listing files in client computer
