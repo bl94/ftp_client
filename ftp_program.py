@@ -6,8 +6,6 @@ import os
 import os.path
 import sys
 from ftplib import FTP, error_perm
-PATH=os.getcwd()
-os.chdir(PATH)
 
 HOST='testbl.prv.pl'
 USER='testbl@prv.pl'
@@ -279,4 +277,6 @@ def __main__():
     ftp_server.action_selection()
 
 if __name__=='__main__':
+    PATH=os.getcwd()
+    os.chdir(PATH)
     __main__()
