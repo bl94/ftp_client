@@ -7,13 +7,6 @@ import os.path
 import sys
 from ftplib import FTP, error_perm
 
-HOST='testbl.prv.pl'
-USER='testbl@prv.pl'
-PASSWD="Lepper12"
-PORT=21
-HOST2='testftp.ugu.pl'
-USER2='testftp.ugu.pl'
-PASSWD="Lepper11"
 
 class Server():
     '''
@@ -31,9 +24,9 @@ class Server():
         '''
         login method
         '''
-        self.host='testftp.ugu.pl'
-        self.user='testftp.ugu.pl'
-        self.passwd="Lepper11"
+        #host='testftp.ugu.pl'
+        #user='testftp.ugu.pl'
+        #passwd="Lepper11"
         print('Login to server:\n')
         self.host=input('Enter your ftp address in format xxx.xxx.xxx: ')
         self.user=input('Enter your username: ')
@@ -166,7 +159,7 @@ class Server():
             print(f"\nDonwload 'donwload_{filename}' to client computer\n")
         except error_perm:
             print('*'*50)
-            print("\nFile or folder does not exist")
+            print("\nFile or folder does not exist!!!")
             print('*'*50)
 
     def upload_file_to_server(self):
@@ -228,7 +221,7 @@ class Server():
         path='/'
         directory=''
         while directory!='end':
-            path+=f"{directory}/"
+            path+=f"{directory}"
             print(f"Directory: {path}")
             print("..")
             self.source.cwd(path)
@@ -243,9 +236,13 @@ class Server():
                 "or if you want to back to the previous directory, will enter 'back': ")
                 if self.search_folder_in_dir(directory) and self.is_file_or_dir(directory)=='directory':
                     input_loop=False
+                    directory+='/'
                 elif directory=='back':
                     input_loop=False
-                    path=path.replace(path.rsplit('/',maxsplit=1)[-2],'')
+                    path=path[::-1]
+                    path=path.replace(path.rsplit('/')[1],'',1)
+                    path=path[::-1]
+                    path=path[:-1]
                     directory=''
                 elif directory=='end':
                     input_loop=False
